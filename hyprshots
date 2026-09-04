@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  screenshot)
+    case "$2" in
+    full)
+      grim - | wl-copy
+      ;;
+    region)
+      grim -g "$(slurp)" - | wl-copy
+      ;;
+    satty)
+      grim -g "$(slurp)" -t ppm - |
+        satty --filename - \
+          --output-filename ~/Pictures/screenshots/satty-$(date "+%Y%m%d-%H:%M:%S").png \
+          --copy-command wl-copy \
+          --actions-on-escape save-to-clipboard,exit
+      ;;
+    *)
+      exit 1
+      ;;
+    esac
+    exit
+    ;;
+  extract)
+    case "$2" in
+    eng)
+      grim -g "$(slurp)" - | tesseract stdin stdout -l eng | wl-copy
+      ;;
+    lang)
+      lang="$(tesseract --list-langs | rofi -dmenu)"
+      grim -g "$(slurp)" - | tesseract stdin stdout -l "$lang" | wl-copy
+      ;;
+    *)
+      exit 1
+      ;;
+    esac
+    exit
+    ;;
+  *)
+    exit 1
+    ;;
+  esac
+done
